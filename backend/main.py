@@ -174,15 +174,96 @@ async def patient_intake(request: IntakeRequest):
 async def get_patient_history(patient_id: str):
     """
     Get patient history from Qdrant vector database.
-
-    This will be implemented in Phase 2.
     """
-    # TODO: Phase 2 - Implement Qdrant retrieval
-    return {
-        "patient_id": patient_id,
-        "message": "Patient history retrieval - Coming in Phase 2",
-        "history": []
+    try:
+        from utils.qdrant_client import get_qdrant_client
+
+        qdrant = get_qdrant_client()
+        history = qdrant.get_patient_history(patient_id=patient_id, limit=10)
+
+        return {
+            "success": True,
+            "patient_id": patient_id,
+            "history": history,
+            "total": len(history)
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "patient_id": patient_id,
+            "message": str(e),
+            "history": []
+        }
+
+
+@app.post("/search")
+async def search_similar_cases(request: dict):
+    """
+    Search for similar cases using semantic search.
+
+    Request body:
+    {
+        "query": "chest pain and breathing difficulty",
+        "limit": 5,
+        "score_threshold": 0.5
     }
+    """
+    try:
+        from utils.qdrant_client import get_qdrant_client
+
+        query = request.get("query", "")
+        limit = request.get("limit", 5)
+        score_threshold = request.get("score_threshold", 0.5)
+
+        if not query:
+            return {
+                "success": False,
+                "message": "Query is required",
+                "results": []
+            }
+
+        qdrant = get_qdrant_client()
+        results = qdrant.search_similar_cases(
+            query_text=query,
+            limit=limit,
+            score_threshold=score_threshold
+        )
+
+        return {
+            "success": True,
+            "query": query,
+            "results": results,
+            "total": len(results)
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e),
+            "results": []
+        }
+
+
+@app.get("/stats")
+async def get_database_stats():
+    """
+    Get database statistics from Qdrant.
+    """
+    try:
+        from utils.qdrant_client import get_qdrant_client
+
+        qdrant = get_qdrant_client()
+        stats = qdrant.get_collection_stats()
+
+        return {
+            "success": True,
+            "stats": stats
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "message": str(e),
+            "stats": {}
+        }
 
 
 if __name__ == "__main__":

@@ -97,7 +97,7 @@ def knowledge_agent(state: GraphState) -> Dict[str, Any]:
             similar_cases = qdrant.search_similar_cases(
                 query_text=search_query,
                 limit=3,
-                score_threshold=0.75
+                score_threshold=0.6  # Lower threshold to catch semantic matches
             )
 
             if similar_cases:

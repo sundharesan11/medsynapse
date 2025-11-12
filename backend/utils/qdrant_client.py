@@ -6,6 +6,7 @@ Uses embeddings to enable semantic search across patient history.
 """
 
 import os
+import uuid
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from qdrant_client import QdrantClient
@@ -128,8 +129,8 @@ class MedicalQdrantClient:
             # Generate embedding
             embedding = self.create_embedding(searchable_text)
 
-            # Create point ID (timestamp-based UUID)
-            point_id = f"{patient_id}_{datetime.utcnow().timestamp()}"
+            # Create point ID (proper UUID format required by Qdrant)
+            point_id = str(uuid.uuid4())
 
             # Prepare payload (metadata)
             payload = {
