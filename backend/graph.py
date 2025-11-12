@@ -79,7 +79,7 @@ def create_medical_graph() -> CompiledStateGraph:
         route_after_knowledge,
         {
             "report": "report",
-            # Future: Add "enhanced_analysis" route here
+            # "enhanced_analysis" route here
         }
     )
 
