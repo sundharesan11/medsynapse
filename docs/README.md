@@ -7,34 +7,27 @@ A multi-agent healthcare system using **LangGraph** to coordinate specialized AI
 ## System Overview
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Doctor's Dashboard (React)                │
-└──────────────────────┬──────────────────────────────────────┘
-                       │
-                       ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  FastAPI Backend                             │
-│  ┌───────────────────────────────────────────────────────┐  │
-│  │              LangGraph Orchestrator                    │  │
-│  │                                                        │  │
-│  │  ┌──────────┐    ┌──────────┐    ┌──────────┐       │  │
-│  │  │ Intake   │───▶│ Summary  │───▶│Knowledge │       │  │
-│  │  │  Agent   │    │  Agent   │    │  Agent   │       │  │
-│  │  └──────────┘    └──────────┘    └────┬─────┘       │  │
-│  │                                        │             │  │
-│  │                                        ▼             │  │
-│  │                                  ┌──────────┐       │  │
-│  │                                  │  Report  │       │  │
-│  │                                  │  Agent   │       │  │
-│  │                                  └──────────┘       │  │
-│  └───────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-           │                    │                    │
-           ▼                    ▼                    ▼
-    ┌─────────┐          ┌──────────┐        ┌──────────┐
-    │  Groq   │          │LangSmith │        │ Qdrant   │
-    │   API   │          │ Tracing  │        │VectorDB  │
-    └─────────┘          └──────────┘        └──────────┘
+                      ┌─────────────────────────────────────────────────────────────┐
+                      │                    Doctor's Dashboard (React)               │
+                      └──────────────────────┬──────────────────────────────────────┘
+                                             │
+                                             ▼
+┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                         FastAPI Backend                                           │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐  │
+│  │                                        LangGraph Orchestrator                               │  │
+│  │                                                                                             │  │
+│  │  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐  │
+│  │  │  Intake  │ ─▶ │  Memory  │ ─▶ │ Summary  │ ─▶ │ Knowledge│ ─▶ │  Report  │ ─▶ │  Storage │  │
+│  │  │  Agent   │    │  Agent   │    │  Agent   │    │  Agent   │    │  Agent   │    │  Agent   │  │
+│  │  └──────────┘    └──────────┘    └──────────┘    └──────────┘    └──────────┘    └──────────┘  │
+│  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+                      │                             │                               │
+                      ▼                             ▼                               ▼
+                ┌──────────────┐            ┌────────────────┐             ┌────────────────┐
+                │   Groq API   │            │ LangSmith Trace│             │    Qdrant DB   │
+                └──────────────┘            └────────────────┘             └────────────────┘
 ```
 
 ---
@@ -42,12 +35,16 @@ A multi-agent healthcare system using **LangGraph** to coordinate specialized AI
 ## Architecture
 
 ### **Multi-Agent System**
+
 1. **Intake Agent** - Extracts structured patient data from conversational input
-2. **Summary Agent** - Generates concise clinical summaries
-3. **Knowledge Agent** - Retrieves relevant medical context from vector DB
-4. **Report Agent** - Produces structured SOAP format reports
+2. **Memory Agent** - Looks up prior visits in Qdrant and enriches state with history
+3. **Summary Agent** - Generates concise clinical summaries
+4. **Knowledge Agent** - Retrieves relevant medical context from vector DB
+5. **Report Agent** - Produces structured SOAP format reports
+6. **Storage Agent** - Saves the finalized case back to Qdrant for future retrieval
 
 ### **Tech Stack**
+
 - **LangGraph** - Multi-agent orchestration
 - **Groq API** - Fast, cost-effective LLM inference
 - **LangSmith** - Complete observability and tracing
@@ -60,6 +57,7 @@ A multi-agent healthcare system using **LangGraph** to coordinate specialized AI
 ## Quick Start
 
 ### **1. Prerequisites**
+
 ```bash
 # Python 3.11+
 python --version
@@ -69,6 +67,7 @@ node --version
 ```
 
 ### **2. Clone & Setup**
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -79,6 +78,7 @@ pip install -r requirements.txt
 ```
 
 ### **3. Configure Environment**
+
 ```bash
 # Copy example env file
 cp .env.example .env
@@ -89,6 +89,7 @@ cp .env.example .env
 ```
 
 ### **4. Start Qdrant (Docker)**
+
 ```bash
 docker run -p 6333:6333 -p 6334:6334 \
   -v $(pwd)/qdrant_storage:/qdrant/storage:z \
@@ -96,12 +97,14 @@ docker run -p 6333:6333 -p 6334:6334 \
 ```
 
 ### **5. Run Backend**
+
 ```bash
 cd backend
 uvicorn main:app --reload --port 8000
 ```
 
 ### **6. Test the System**
+
 ```bash
 # Run example patient intake
 python backend/tests/test_graph.py
@@ -111,11 +114,11 @@ python backend/tests/test_graph.py
 
 ## Development Phases
 
-- [x] **Phase 1** - Minimal working prototype (LangGraph + Groq + LangSmith)
-- [x] **Phase 2** - Qdrant memory integration (NEW)
-- [ ] **Phase 3** - React dashboard UI
-- [ ] **Phase 4** - Enhanced orchestration & logging
-- [ ] **Phase 5** - Docker containerization
+- [X] **Phase 1** - Minimal working prototype (LangGraph + Groq + LangSmith)
+- [X] **Phase 2** - Qdrant memory integration (NEW)
+- [X] **Phase 3** - React dashboard UI
+- [X] **Phase 4** - Enhanced orchestration & logging
+- [X] **Phase 5** - Docker containerization
 
 ---
 
@@ -126,9 +129,11 @@ medsynapse/
 ├── backend/
 │   ├── agents/              # Agent node implementations
 │   │   ├── intake.py
+│   │   ├── memory.py
 │   │   ├── summary.py
 │   │   ├── knowledge.py
-│   │   └── report.py
+│   │   ├── report.py
+│   │   └── storage.py
 │   ├── models/              # Pydantic models
 │   │   └── schemas.py
 │   ├── utils/               # Utilities
@@ -154,6 +159,7 @@ medsynapse/
 ## Observability
 
 All agent runs are automatically traced in **LangSmith**:
+
 1. Go to [smith.langchain.com](https://smith.langchain.com)
 2. Select project: `medsynapse-dev`
 3. View detailed traces of each agent execution
@@ -178,10 +184,12 @@ All agent runs are automatically traced in **LangSmith**:
 ## Troubleshooting
 
 ### **Issue: LangSmith not tracing**
+
 - Ensure `LANGCHAIN_TRACING_V2=true` in `.env`
 - Check API key is valid
 
 ### **Issue: Groq rate limits**
+
 - Free tier: 30 requests/minute
 - Consider implementing retry logic
 
