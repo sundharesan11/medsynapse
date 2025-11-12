@@ -111,14 +111,25 @@ Click into it to see:
 
 ---
 
-## Step 6: Start FastAPI Server (Optional)
+## Step 6: Run the Stack Locally (Backend + Frontend)
 
-```bash
-# From backend directory
-uvicorn main:app --reload --port 8000
-```
+1. **Start Qdrant (once):**
+   ```bash
+   docker-compose up -d qdrant
+   ```
+2. **Run the backend API:**
+   ```bash
+   cd backend
+   uvicorn main:app --reload --port 8000
+   ```
+3. **Start the React frontend (new terminal):**
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-Visit: [http://localhost:8000/docs](http://localhost:8000/docs)
+Visit the FastAPI docs at [http://localhost:8000/docs](http://localhost:8000/docs) and the React UI at [http://localhost:5173](http://localhost:5173).
 
 You'll see interactive API documentation!
 
@@ -129,6 +140,28 @@ Try the `/intake` endpoint:
   "raw_input": "Patient has headache for 3 days, feels dizzy"
 }
 ```
+
+---
+
+## Step 7: Run Everything with Docker
+
+Prefer a one-command setup? Use the provided Compose stack (FastAPI backend, React frontend, Qdrant).
+
+```bash
+# From repo root
+docker-compose up --build
+```
+
+Key commands:
+- `docker-compose up -d` – start in the background
+- `docker-compose logs -f backend` – tail backend logs
+- `docker-compose down` – stop all containers
+
+Once containers are up:
+- Backend API: `http://localhost:8000`
+- Swagger docs: `http://localhost:8000/docs`
+- Frontend UI: `http://localhost:5173`
+- Qdrant dashboard (if enabled): `http://localhost:6333/dashboard`
 
 ---
 
