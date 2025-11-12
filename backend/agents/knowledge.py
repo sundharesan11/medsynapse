@@ -119,10 +119,9 @@ def knowledge_agent(state: GraphState) -> Dict[str, Any]:
         routing_path = state.routing_path + ["knowledge"]
 
         # Temporarily update state to check if enhanced analysis is needed
-        temp_state = GraphState(
-            **state.dict(),
-            knowledge_context=knowledge_context
-        )
+        state_data = state.model_dump()
+        state_data["knowledge_context"] = knowledge_context
+        temp_state = GraphState(**state_data)
         requires_enhanced = should_use_enhanced_analysis(temp_state)
 
         print(f"SUCCESS: [KNOWLEDGE AGENT] Knowledge retrieved")
@@ -147,5 +146,4 @@ def knowledge_agent(state: GraphState) -> Dict[str, Any]:
             "errors": state.errors + [error_msg],
             "current_step": "knowledge_failed"
         }
-
 

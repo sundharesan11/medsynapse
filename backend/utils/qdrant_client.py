@@ -22,7 +22,12 @@ from qdrant_client.http.exceptions import UnexpectedResponse
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 from utils.retry import retry_with_exponential_backoff
-from utils.cache import cached, get_search_cache, get_patient_history_cache
+from utils.cache import (
+    cached,
+    get_search_cache,
+    get_patient_history_cache,
+    invalidate_patient_history_cache,
+)
 
 load_dotenv()
 
@@ -167,6 +172,10 @@ class MedicalQdrantClient:
             )
 
             print(f"Stored case for patient {patient_id} in Qdrant")
+
+            # Invalidate cached history for this patient so new data is visible immediately
+            invalidate_patient_history_cache(patient_id)
+
             return point_id
 
         except Exception as e:

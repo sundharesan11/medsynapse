@@ -89,6 +89,12 @@ class TTLCache:
         with self._lock:
             self._cache.clear()
 
+    def delete(self, key: str):
+        """Remove a specific cache entry if it exists."""
+        with self._lock:
+            if key in self._cache:
+                del self._cache[key]
+
     def size(self) -> int:
         """Get current number of cached items."""
         with self._lock:
@@ -231,3 +237,13 @@ def get_cache_stats() -> Dict[str, Any]:
             "default_ttl": _patient_history_cache.default_ttl,
         },
     }
+
+
+def invalidate_patient_history_cache(patient_id: str, limit: int = 10):
+    """
+    Invalidate cached history for a specific patient.
+
+    The get_patient_history decorator uses function name + hashed args as key.
+    """
+    key = f"get_patient_history:{cache_key(patient_id, limit)}"
+    _patient_history_cache.delete(key)
