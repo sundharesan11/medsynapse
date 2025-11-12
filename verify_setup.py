@@ -190,7 +190,7 @@ def main():
     else:
         print("❌ Some checks failed. Please fix the issues above.")
         print("\n📚 Help:")
-        print("   See SETUP.md for detailed instructions")
+        print("   See docs/SETUP.md for detailed instructions")
         print("   See docs/README.md for troubleshooting\n")
         return False
 
