@@ -1,10 +1,10 @@
-# 🩺 Doctor's Intelligent Assistant (MedSynapse)
+# Doctor's Intelligent Assistant (MedSynapse)
 
 A multi-agent healthcare system using **LangGraph** to coordinate specialized AI agents for intelligent patient intake, clinical summarization, knowledge retrieval, and SOAP report generation.
 
 ---
 
-## 🎯 **System Overview**
+## System Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -39,7 +39,7 @@ A multi-agent healthcare system using **LangGraph** to coordinate specialized AI
 
 ---
 
-## 🧱 **Architecture**
+## Architecture
 
 ### **Multi-Agent System**
 1. **Intake Agent** - Extracts structured patient data from conversational input
@@ -57,7 +57,7 @@ A multi-agent healthcare system using **LangGraph** to coordinate specialized AI
 
 ---
 
-## 🚀 **Quick Start**
+## Quick Start
 
 ### **1. Prerequisites**
 ```bash
@@ -104,22 +104,22 @@ uvicorn main:app --reload --port 8000
 ### **6. Test the System**
 ```bash
 # Run example patient intake
-python backend/test_graph.py
+python backend/tests/test_graph.py
 ```
 
 ---
 
-## 📊 **Development Phases**
+## Development Phases
 
 - [x] **Phase 1** - Minimal working prototype (LangGraph + Groq + LangSmith)
-- [x] **Phase 2** - Qdrant memory integration ✨ NEW
+- [x] **Phase 2** - Qdrant memory integration (NEW)
 - [ ] **Phase 3** - React dashboard UI
 - [ ] **Phase 4** - Enhanced orchestration & logging
 - [ ] **Phase 5** - Docker containerization
 
 ---
 
-## 🧩 **Project Structure**
+## Project Structure
 
 ```
 medsynapse/
@@ -136,17 +136,22 @@ medsynapse/
 │   │   └── qdrant_client.py
 │   ├── graph.py             # LangGraph orchestration
 │   ├── main.py              # FastAPI app
-│   └── test_graph.py        # Testing script
+│   └── tests/               # Testing scripts
+│       ├── test_graph.py
+│       ├── test_phase4_routing.py
+│       └── test_qdrant.py
+├── docs/
+│   └── README.md            # Project documentation
 ├── frontend/                # React application
 │   └── src/
 ├── requirements.txt
-├── .env.example
-└── README.md
+├── docker-compose.yml
+└── .env.example
 ```
 
 ---
 
-## 🔍 **Observability**
+## Observability
 
 All agent runs are automatically traced in **LangSmith**:
 1. Go to [smith.langchain.com](https://smith.langchain.com)
@@ -155,7 +160,7 @@ All agent runs are automatically traced in **LangSmith**:
 
 ---
 
-## 📝 **Example Output**
+## Example Output
 
 ```json
 {
@@ -170,7 +175,7 @@ All agent runs are automatically traced in **LangSmith**:
 
 ---
 
-## 🛠️ **Troubleshooting**
+## Troubleshooting
 
 ### **Issue: LangSmith not tracing**
 - Ensure `LANGCHAIN_TRACING_V2=true` in `.env`
@@ -182,7 +187,7 @@ All agent runs are automatically traced in **LangSmith**:
 
 ---
 
-## 📚 **Resources**
+## Resources
 
 - [LangGraph Documentation](https://langchain-ai.github.io/langgraph/)
 - [Groq API Docs](https://console.groq.com/docs)
@@ -191,10 +196,10 @@ All agent runs are automatically traced in **LangSmith**:
 
 ---
 
-## 🤝 **Contributing**
+## Contributing
 
 This is a learning project. Experiment, break things, and learn!
 
 ---
 
-**Built with ❤️ using LangGraph**
+**Built with LangGraph**

@@ -1,4 +1,4 @@
-# 🚀 Setup Guide - Doctor's Intelligent Assistant
+# Setup Guide - Doctor's Intelligent Assistant
 
 Follow these steps to get the system running.
 
@@ -6,7 +6,7 @@ Follow these steps to get the system running.
 
 ## Step 1: Get Your API Keys
 
-### 🤖 Groq API Key (Required)
+### Groq API Key (Required)
 1. Go to [https://console.groq.com/keys](https://console.groq.com/keys)
 2. Sign up or log in
 3. Click "Create API Key"
@@ -17,7 +17,7 @@ Follow these steps to get the system running.
 - Free tier: 30 requests/minute
 - Great for development!
 
-### 📊 LangSmith API Key (Recommended for debugging)
+### LangSmith API Key (Recommended for debugging)
 1. Go to [https://smith.langchain.com/settings](https://smith.langchain.com/settings)
 2. Sign up or log in
 3. Create an API key
@@ -77,20 +77,20 @@ This installs:
 ```bash
 # From the project root
 cd backend
-python test_graph.py
+python tests/test_graph.py
 ```
 
 You should see:
 ```
-🚀 Starting medical intake pipeline for patient P12345
-🩺 [INTAKE AGENT] Starting patient data extraction...
-✅ [INTAKE AGENT] Extracted data for patient P12345
-📋 [SUMMARY AGENT] Generating clinical summary...
-✅ [SUMMARY AGENT] Summary generated
-🔍 [KNOWLEDGE AGENT] Retrieving medical knowledge...
-✅ [KNOWLEDGE AGENT] Knowledge retrieved
-📄 [REPORT AGENT] Generating SOAP report...
-✅ [REPORT AGENT] SOAP report generated for patient P12345
+Starting medical intake pipeline for patient P12345
+[INTAKE AGENT] Starting patient data extraction...
+[INTAKE AGENT] Extracted data for patient P12345
+[SUMMARY AGENT] Generating clinical summary...
+[SUMMARY AGENT] Summary generated
+[KNOWLEDGE AGENT] Retrieving medical knowledge...
+[KNOWLEDGE AGENT] Knowledge retrieved
+[REPORT AGENT] Generating SOAP report...
+[REPORT AGENT] SOAP report generated for patient P12345
 ```
 
 ---
@@ -132,7 +132,7 @@ Try the `/intake` endpoint:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "GROQ_API_KEY not found"
 - Make sure `.env` file exists in project root
@@ -155,17 +155,17 @@ Try the `/intake` endpoint:
 
 ---
 
-## 🎯 What's Next?
+## What's Next?
 
-- ✅ **Phase 1 Complete** - Basic multi-agent system working!
-- 🔄 **Phase 2** - Add Qdrant for patient history
-- 🎨 **Phase 3** - Build React dashboard
-- 📊 **Phase 4** - Enhanced tracing
-- 🐳 **Phase 5** - Docker deployment
+- Phase 1 Complete - Basic multi-agent system working!
+- Phase 2 - Add Qdrant for patient history
+- Phase 3 - Build React dashboard
+- Phase 4 - Enhanced tracing
+- Phase 5 - Docker deployment
 
 ---
 
-## 📚 Learn More
+## Learn More
 
 - [LangGraph Docs](https://langchain-ai.github.io/langgraph/)
 - [Groq Docs](https://console.groq.com/docs)
@@ -173,4 +173,4 @@ Try the `/intake` endpoint:
 
 ---
 
-**Need help? Check the main README.md or review the code comments!**
+**Need help? Check `docs/README.md` or review the code comments!**

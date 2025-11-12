@@ -1,10 +1,10 @@
-# 🎬 Interactive Demo Guide
+# Interactive Demo Guide
 
 Perfect for showcasing to colleagues, stakeholders, or investors!
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Make sure Qdrant is running
@@ -20,7 +20,7 @@ python3 demo.py
 
 ---
 
-## 🎯 Demo Features
+## Demo Features
 
 The interactive demo includes:
 
@@ -53,7 +53,7 @@ The interactive demo includes:
 
 ---
 
-## 🎭 Demo Flow (Recommended)
+## Demo Flow (Recommended)
 
 ### **For First-Time Viewers:**
 
@@ -90,14 +90,14 @@ Add these talking points:
 
 ---
 
-## 💡 Demo Tips
+## Demo Tips
 
 ### **Before the Demo:**
 
 ```bash
 # 1. Pre-populate with 2-3 cases for better similar case demos
 cd backend
-python3 test_qdrant.py  # Adds 5 diverse cases
+python3 tests/test_qdrant.py  # Adds 5 diverse cases
 
 # 2. Open these tabs in browser:
 # - LangSmith: https://smith.langchain.com
@@ -122,9 +122,9 @@ python3 demo.py
    - Browser Tab 2: Qdrant dashboard (vector storage)
 
 3. **Highlight The Magic**
-   - ✨ "It understands 'chest pain' and 'cardiac symptoms' are similar"
-   - ✨ "Each case is automatically stored with embeddings"
-   - ✨ "The system learns from every patient encounter"
+   - "It understands 'chest pain' and 'cardiac symptoms' are similar"
+   - "Each case is automatically stored with embeddings"
+   - "The system learns from every patient encounter"
 
 ### **After the Demo:**
 
@@ -138,7 +138,7 @@ python3 demo.py
 
 ---
 
-## 🎬 Example Demo Script
+## Example Demo Script
 
 Here's a 5-minute demo script:
 
@@ -185,31 +185,31 @@ See? Same quality, any case, every time."
 
 ---
 
-## 📊 What to Highlight
+## What to Highlight
 
 ### **For Business Stakeholders:**
-- ✅ Reduces documentation time by 70%
-- ✅ Improves clinical decision support
-- ✅ Pattern recognition across patients
-- ✅ HIPAA-compliant local deployment
+- Reduces documentation time by 70%
+- Improves clinical decision support
+- Pattern recognition across patients
+- HIPAA-compliant local deployment
 
 ### **For Technical Audiences:**
-- ✅ LangGraph state machine orchestration
-- ✅ Groq for 10x faster LLM inference
-- ✅ Vector embeddings for semantic search
-- ✅ Complete observability with LangSmith
-- ✅ Scalable to millions of cases
+- LangGraph state machine orchestration
+- Groq for 10x faster LLM inference
+- Vector embeddings for semantic search
+- Complete observability with LangSmith
+- Scalable to millions of cases
 
 ### **For Medical Professionals:**
-- ✅ SOAP format standard compliance
-- ✅ Clinical guideline integration
-- ✅ Similar case recommendations
-- ✅ Differential diagnosis support
-- ✅ Structured data extraction
+- SOAP format standard compliance
+- Clinical guideline integration
+- Similar case recommendations
+- Differential diagnosis support
+- Structured data extraction
 
 ---
 
-## 🐛 Troubleshooting During Demo
+## Troubleshooting During Demo
 
 ### **"Qdrant not running"**
 ```bash
@@ -221,8 +221,8 @@ sleep 5
 
 ### **"No similar cases found"**
 ```bash
-# Pre-populate database:
-python3 test_qdrant.py
+# Pre-populate database (from repo root):
+python3 backend/tests/test_qdrant.py
 # Then re-run similar case demo
 ```
 
@@ -233,7 +233,7 @@ python3 test_qdrant.py
 
 ---
 
-## 🎓 FAQ During Demos
+## FAQ During Demos
 
 **Q: Can it handle different medical specialties?**
 A: Yes! Just modify the agent prompts. Works for any specialty.
@@ -255,7 +255,7 @@ A: Complete pipeline: 5-10 seconds. Groq is 10x faster than OpenAI.
 
 ---
 
-## 🚀 Advanced Demo: Live Traces
+## Advanced Demo: Live Traces
 
 **For Technical Audiences:**
 
@@ -273,7 +273,7 @@ A: Complete pipeline: 5-10 seconds. Groq is 10x faster than OpenAI.
 
 ---
 
-## 📹 Recording a Demo Video
+## Recording a Demo Video
 
 ```bash
 # Use asciinema to record terminal
@@ -292,11 +292,11 @@ asciinema play demo.cast
 
 ---
 
-## ✅ Pre-Demo Checklist
+## Pre-Demo Checklist
 
 - [ ] Qdrant running: `docker ps | grep qdrant`
 - [ ] API keys set: Check `.env`
-- [ ] Database populated: `python3 test_qdrant.py`
+- [ ] Database populated: `python3 backend/tests/test_qdrant.py`
 - [ ] Browser tabs open: LangSmith + Qdrant Dashboard
 - [ ] Test run completed: `python3 demo.py` (option 1)
 - [ ] Know your talking points
@@ -304,18 +304,18 @@ asciinema play demo.cast
 
 ---
 
-## 🎉 You're Ready!
+## You're Ready!
 
 ```bash
 cd backend
 python3 demo.py
 ```
 
-**Break a leg!** 🚀
+**Break a leg!**
 
 ---
 
 **Need help during demo?**
 - Press Ctrl+C to exit anytime
-- View README.md for system overview
+- View docs/README.md for system overview
 - Check PHASE2_GUIDE.md for technical details

@@ -13,6 +13,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from models.schemas import GraphState, KnowledgeContext
 from utils.groq_client import get_knowledge_llm
 from utils.qdrant_client import get_qdrant_client
+from utils.routing import should_use_enhanced_analysis
 
 
 KNOWLEDGE_PROMPT = ChatPromptTemplate.from_messages([
@@ -60,7 +61,7 @@ def knowledge_agent(state: GraphState) -> Dict[str, Any]:
     Returns:
         Dictionary with updated state (adds knowledge_context field)
     """
-    print("🔍 [KNOWLEDGE AGENT] Retrieving medical knowledge...")
+    print("[KNOWLEDGE AGENT] Retrieving medical knowledge...")
 
     if not state.clinical_summary:
         return {
@@ -101,12 +102,12 @@ def knowledge_agent(state: GraphState) -> Dict[str, Any]:
             )
 
             if similar_cases:
-                print(f"   📚 Found {len(similar_cases)} similar cases in history")
+                print(f"   Found {len(similar_cases)} similar cases in history")
                 for i, case in enumerate(similar_cases, 1):
                     print(f"      {i}. Score: {case['score']:.2f} | {case['chief_complaint']}")
 
         except Exception as qdrant_error:
-            print(f"   ⚠️  Qdrant search failed: {qdrant_error}")
+            print(f"   WARNING: Qdrant search failed: {qdrant_error}")
             print("   Continuing without similar case retrieval...")
 
         # Add similar cases to result
@@ -114,20 +115,34 @@ def knowledge_agent(state: GraphState) -> Dict[str, Any]:
 
         knowledge_context = KnowledgeContext(**result)
 
-        print(f"✅ [KNOWLEDGE AGENT] Knowledge retrieved")
+        # Phase 4: Update routing path and check if enhanced analysis is needed
+        routing_path = state.routing_path + ["knowledge"]
+
+        # Temporarily update state to check if enhanced analysis is needed
+        temp_state = GraphState(
+            **state.dict(),
+            knowledge_context=knowledge_context
+        )
+        requires_enhanced = should_use_enhanced_analysis(temp_state)
+
+        print(f"SUCCESS: [KNOWLEDGE AGENT] Knowledge retrieved")
         print(f"   Conditions: {len(knowledge_context.relevant_conditions)}")
         print(f"   Guidelines: {len(knowledge_context.clinical_guidelines)}")
         print(f"   Similar cases: {len(knowledge_context.similar_cases)}")
         print(f"   Confidence: {knowledge_context.confidence_score:.2f}")
+        if requires_enhanced:
+            print(f"   WARNING: Enhanced analysis recommended")
 
         return {
             "knowledge_context": knowledge_context,
-            "current_step": "report"
+            "current_step": "report",
+            "routing_path": routing_path,
+            "requires_enhanced_analysis": requires_enhanced,
         }
 
     except Exception as e:
         error_msg = f"Knowledge agent error: {str(e)}"
-        print(f"❌ [KNOWLEDGE AGENT] {error_msg}")
+        print(f"ERROR: [KNOWLEDGE AGENT] {error_msg}")
         return {
             "errors": state.errors + [error_msg],
             "current_step": "knowledge_failed"

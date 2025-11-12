@@ -9,13 +9,20 @@ This demonstrates:
 """
 
 import os
+import sys
 import time
+from pathlib import Path
+
 from dotenv import load_dotenv
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 load_dotenv()
 
-from graph import process_patient_intake_sync
-from utils.qdrant_client import get_qdrant_client
+from backend.graph import process_patient_intake_sync
+from backend.utils.qdrant_client import get_qdrant_client
 
 
 def print_section(title: str):
@@ -92,7 +99,7 @@ def test_store_multiple_cases():
         }
     ]
 
-    print(f"📝 Processing {len(test_cases)} patient cases...\n")
+    print(f"Processing {len(test_cases)} patient cases...\n")
 
     for i, case in enumerate(test_cases, 1):
         print(f"\n--- Case {i}/{len(test_cases)}: {case['patient_id']} ---")
@@ -105,14 +112,14 @@ def test_store_multiple_cases():
         )
 
         if result.soap_report:
-            print(f"✅ Case {case['patient_id']} processed and stored")
+            print(f"SUCCESS: Case {case['patient_id']} processed and stored")
         else:
-            print(f"❌ Case {case['patient_id']} failed")
+            print(f"ERROR: Case {case['patient_id']} failed")
 
         # Small delay to avoid rate limits
         time.sleep(2)
 
-    print_section("✅ All Cases Stored")
+    print_section("SUCCESS: All Cases Stored")
 
 
 def test_semantic_search():
@@ -142,7 +149,7 @@ def test_semantic_search():
 
     for i, test in enumerate(test_queries, 1):
         print(f"\n--- Query {i} ---")
-        print(f"🔍 Searching for: \"{test['query']}\"")
+        print(f"Searching for: \"{test['query']}\"")
         print(f"   Expected: {test['expected']}")
 
         results = qdrant.search_similar_cases(
@@ -152,13 +159,13 @@ def test_semantic_search():
         )
 
         if results:
-            print(f"\n✅ Found {len(results)} similar cases:")
+            print(f"\nSUCCESS: Found {len(results)} similar cases:")
             for j, case in enumerate(results, 1):
                 print(f"\n   {j}. Patient {case['patient_id']} (Score: {case['score']:.2f})")
                 print(f"      Chief Complaint: {case['chief_complaint']}")
                 print(f"      Symptoms: {', '.join(case['symptoms'][:3])}...")
         else:
-            print("   ❌ No similar cases found")
+            print("   ERROR: No similar cases found")
 
         print()
 
@@ -175,12 +182,12 @@ def test_patient_history():
 
     # Test retrieving history for P001
     patient_id = "P001"
-    print(f"📚 Retrieving history for patient {patient_id}...")
+    print(f"Retrieving history for patient {patient_id}...")
 
     history = qdrant.get_patient_history(patient_id=patient_id, limit=10)
 
     if history:
-        print(f"\n✅ Found {len(history)} previous encounters:\n")
+        print(f"\nSUCCESS: Found {len(history)} previous encounters:\n")
         for i, encounter in enumerate(history, 1):
             print(f"{i}. {encounter['timestamp'][:19]}")
             print(f"   Chief Complaint: {encounter['chief_complaint']}")
@@ -199,7 +206,7 @@ def test_collection_stats():
     qdrant = get_qdrant_client()
     stats = qdrant.get_collection_stats()
 
-    print("📊 Qdrant Collection Stats:")
+    print("Qdrant Collection Stats:")
     print(f"   Total Cases: {stats.get('total_cases', 0)}")
     print(f"   Vector Dimension: {stats.get('vector_dimension', 0)}")
     print(f"   Status: {stats.get('status', 'Unknown')}")
@@ -214,7 +221,7 @@ def test_similar_case_in_pipeline():
     """
     print_section("TEST 5: New Case with Similar Case Retrieval")
 
-    print("📝 Processing a NEW patient with cardiac symptoms...")
+    print("Processing a NEW patient with cardiac symptoms...")
     print("   The knowledge agent should find similar cases from P001 and P003\n")
 
     new_case_input = """
@@ -231,7 +238,7 @@ def test_similar_case_in_pipeline():
     )
 
     if result.knowledge_context and result.knowledge_context.similar_cases:
-        print("\n✨ SIMILAR HISTORICAL CASES FOUND:")
+        print("\nSIMILAR HISTORICAL CASES FOUND:")
         for i, case in enumerate(result.knowledge_context.similar_cases, 1):
             print(f"\n{i}. Patient {case['patient_id']} (Similarity: {case['score']:.0%})")
             print(f"   Chief Complaint: {case['chief_complaint']}")
@@ -244,23 +251,23 @@ def main():
     """Run all Phase 2 tests."""
 
     print("\n" + "="*70)
-    print("  🧠 PHASE 2: QDRANT VECTOR DATABASE INTEGRATION")
+    print("  PHASE 2: QDRANT VECTOR DATABASE INTEGRATION")
     print("     Testing Patient Memory & Semantic Search")
     print("="*70)
 
     # Check environment
-    print("\n🔧 Environment Check:")
-    print(f"  GROQ_API_KEY: {'✅' if os.getenv('GROQ_API_KEY') else '❌'}")
+    print("\nEnvironment Check:")
+    print(f"  GROQ_API_KEY: {'SUCCESS' if os.getenv('GROQ_API_KEY') else 'ERROR'}")
     print(f"  QDRANT_URL: {os.getenv('QDRANT_URL', 'http://localhost:6333')}")
 
     # Check Qdrant connection
-    print("\n🔌 Checking Qdrant connection...")
+    print("\nChecking Qdrant connection...")
     try:
         qdrant = get_qdrant_client()
-        print("✅ Connected to Qdrant successfully")
+        print("SUCCESS: Connected to Qdrant successfully")
     except Exception as e:
-        print(f"❌ Failed to connect to Qdrant: {e}")
-        print("\n⚠️  Make sure Qdrant is running:")
+        print(f"ERROR: Failed to connect to Qdrant: {e}")
+        print("\nWARNING: Make sure Qdrant is running:")
         print("   docker-compose up -d qdrant")
         print("\nOr start it manually:")
         print("   docker run -p 6333:6333 qdrant/qdrant")
@@ -283,19 +290,19 @@ def main():
         # Test 5: Similar cases in pipeline
         test_similar_case_in_pipeline()
 
-        print_section("✅ ALL PHASE 2 TESTS COMPLETED")
+        print_section("SUCCESS: ALL PHASE 2 TESTS COMPLETED")
 
-        print("🎉 Phase 2 Features Working:")
-        print("   ✅ Case storage with embeddings")
-        print("   ✅ Semantic similarity search")
-        print("   ✅ Patient history retrieval")
-        print("   ✅ Similar case recommendations in pipeline")
+        print("Phase 2 Features Working:")
+        print("   SUCCESS: Case storage with embeddings")
+        print("   SUCCESS: Semantic similarity search")
+        print("   SUCCESS: Patient history retrieval")
+        print("   SUCCESS: Similar case recommendations in pipeline")
 
-        print("\n🔍 View Qdrant UI at: http://localhost:3001")
+        print("\nView Qdrant UI at: http://localhost:3001")
         print("   (if you started docker-compose with qdrant-web-ui)")
 
     except Exception as e:
-        print(f"\n❌ Test failed with error:")
+        print(f"\nERROR: Test failed with error:")
         print(f"   {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()

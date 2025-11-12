@@ -26,22 +26,22 @@ async def lifespan(app: FastAPI):
     Runs on startup and shutdown to initialize/cleanup resources.
     """
     # Startup
-    print("🚀 Starting Doctor's Intelligent Assistant API")
-    print(f"📊 LangSmith Tracing: {os.getenv('LANGCHAIN_TRACING_V2', 'false')}")
-    print(f"🤖 Groq API configured: {bool(os.getenv('GROQ_API_KEY'))}")
+    print("Starting Doctor's Intelligent Assistant API")
+    print(f"LangSmith Tracing: {os.getenv('LANGCHAIN_TRACING_V2', 'false')}")
+    print(f"Groq API configured: {bool(os.getenv('GROQ_API_KEY'))}")
 
     # Verify required environment variables
     required_vars = ["GROQ_API_KEY", "LANGCHAIN_API_KEY"]
     missing = [var for var in required_vars if not os.getenv(var)]
 
     if missing:
-        print(f"⚠️  WARNING: Missing environment variables: {', '.join(missing)}")
+        print(f"WARNING: Missing environment variables: {', '.join(missing)}")
         print("   Some features may not work correctly")
 
     yield
 
     # Shutdown
-    print("👋 Shutting down Doctor's Intelligent Assistant API")
+    print("Shutting down Doctor's Intelligent Assistant API")
 
 
 # Create FastAPI app
@@ -170,30 +170,109 @@ async def patient_intake(request: IntakeRequest):
         )
 
 
-@app.get("/patient/{patient_id}/history")
-async def get_patient_history(patient_id: str):
+@app.get("/history/{patient_id}")
+async def get_patient_history(patient_id: str, limit: int = 10):
     """
-    Get patient history from Qdrant vector database.
+    Get patient medical history using the Memory Agent.
+
+    Phase 5: Enhanced to use the memory agent directly.
+
+    Args:
+        patient_id: Patient identifier
+        limit: Maximum number of historical visits to retrieve (default: 10)
+
+    Returns:
+        JSON with patient history, summaries, and timestamps
+
+    Example:
+        ```bash
+        curl "http://localhost:8000/history/P12345?limit=10"
+        ```
     """
     try:
-        from utils.qdrant_client import get_qdrant_client
+        from agents.memory import get_patient_history_standalone, get_patient_history_summary
 
-        qdrant = get_qdrant_client()
-        history = qdrant.get_patient_history(patient_id=patient_id, limit=10)
+        # Use the memory agent to retrieve history
+        history = await get_patient_history_standalone(patient_id, limit)
+
+        # Generate human-readable summary
+        summary = get_patient_history_summary(history)
 
         return {
             "success": True,
             "patient_id": patient_id,
             "history": history,
-            "total": len(history)
+            "total": len(history),
+            "summary": summary
         }
     except Exception as e:
-        return {
-            "success": False,
-            "patient_id": patient_id,
-            "message": str(e),
-            "history": []
-        }
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error retrieving patient history: {str(e)}"
+        )
+
+
+@app.post("/query")
+async def doctor_query(request: dict):
+    """
+    Ask natural-language questions about patient history using RAG.
+
+    Phase 5: New endpoint using the Doctor Query Agent.
+
+    This endpoint uses RAG (Retrieval-Augmented Generation):
+    1. Retrieves relevant patient data from Qdrant
+    2. Uses Groq LLM to generate an answer based on retrieved data
+    3. All runs are traced in LangSmith
+
+    Request body:
+    {
+        "patient_id": "P12345",  # Optional - filters to specific patient
+        "question": "What were the patient's previous diagnoses for chest pain?",
+        "limit": 5  # Optional - max number of records to retrieve
+    }
+
+    Returns:
+        JSON with answer, sources, and metadata
+
+    Example:
+        ```bash
+        curl -X POST "http://localhost:8000/query" \\
+             -H "Content-Type: application/json" \\
+             -d '{
+                   "patient_id": "P12345",
+                   "question": "What medications has the patient been prescribed?"
+                 }'
+        ```
+    """
+    try:
+        from agents.query import query_agent
+
+        patient_id = request.get("patient_id", "")
+        question = request.get("question", "")
+        limit = request.get("limit", 5)
+
+        if not question:
+            raise HTTPException(
+                status_code=400,
+                detail="Question is required"
+            )
+
+        # Use the query agent to answer the question
+        result = await query_agent(
+            patient_id=patient_id,
+            question=question,
+            limit=limit
+        )
+
+        return result
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error processing query: {str(e)}"
+        )
 
 
 @app.post("/search")

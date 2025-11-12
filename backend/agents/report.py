@@ -72,7 +72,7 @@ def report_agent(state: GraphState) -> Dict[str, Any]:
     Returns:
         Dictionary with updated state (adds soap_report field)
     """
-    print("📄 [REPORT AGENT] Generating SOAP report...")
+    print("[REPORT AGENT] Generating SOAP report...")
 
     # Validate all required data is present
     if not state.structured_data:
@@ -126,18 +126,22 @@ def report_agent(state: GraphState) -> Dict[str, Any]:
             **result
         )
 
-        print(f"✅ [REPORT AGENT] SOAP report generated for patient {data.patient_id}")
+        # Phase 4: Update routing path
+        routing_path = state.routing_path + ["report"]
+
+        print(f"SUCCESS: [REPORT AGENT] SOAP report generated for patient {data.patient_id}")
         print(f"   Confidence: {soap_report.confidence_level}")
         print(f"   Flags: {len(soap_report.flags)}")
 
         return {
             "soap_report": soap_report,
-            "current_step": "completed"
+            "current_step": "completed",
+            "routing_path": routing_path,
         }
 
     except Exception as e:
         error_msg = f"Report agent error: {str(e)}"
-        print(f"❌ [REPORT AGENT] {error_msg}")
+        print(f"ERROR: [REPORT AGENT] {error_msg}")
         return {
             "errors": state.errors + [error_msg],
             "current_step": "report_failed"

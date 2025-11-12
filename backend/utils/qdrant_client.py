@@ -18,8 +18,11 @@ from qdrant_client.models import (
     FieldCondition,
     MatchValue,
 )
+from qdrant_client.http.exceptions import UnexpectedResponse
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
+from utils.retry import retry_with_exponential_backoff
+from utils.cache import cached, get_search_cache, get_patient_history_cache
 
 load_dotenv()
 
@@ -58,10 +61,10 @@ class MedicalQdrantClient:
         )
 
         # Initialize embedding model
-        print(f"🔧 Loading embedding model: {embedding_model}...")
+        print(f"Loading embedding model: {embedding_model}...")
         self.embedding_model = SentenceTransformer(embedding_model)
         self.embedding_dim = self.embedding_model.get_sentence_embedding_dimension()
-        print(f"✅ Embedding model loaded (dimension: {self.embedding_dim})")
+        print(f"SUCCESS: Embedding model loaded (dimension: {self.embedding_dim})")
 
         # Collection names
         self.PATIENT_CASES_COLLECTION = "patient_cases"
@@ -77,7 +80,7 @@ class MedicalQdrantClient:
             collection_names = [c.name for c in collections]
 
             if self.PATIENT_CASES_COLLECTION not in collection_names:
-                print(f"📦 Creating collection: {self.PATIENT_CASES_COLLECTION}")
+                print(f"Creating collection: {self.PATIENT_CASES_COLLECTION}")
                 self.client.create_collection(
                     collection_name=self.PATIENT_CASES_COLLECTION,
                     vectors_config=VectorParams(
@@ -85,12 +88,12 @@ class MedicalQdrantClient:
                         distance=Distance.COSINE  # Cosine similarity for semantic search
                     ),
                 )
-                print(f"✅ Collection created: {self.PATIENT_CASES_COLLECTION}")
+                print(f"SUCCESS: Collection created: {self.PATIENT_CASES_COLLECTION}")
             else:
-                print(f"✅ Collection exists: {self.PATIENT_CASES_COLLECTION}")
+                print(f"SUCCESS: Collection exists: {self.PATIENT_CASES_COLLECTION}")
 
         except Exception as e:
-            print(f"⚠️  Error initializing collections: {e}")
+            print(f"WARNING: Error initializing collections: {e}")
             print("   Make sure Qdrant is running: docker-compose up -d qdrant")
 
     def create_embedding(self, text: str) -> List[float]:
@@ -105,6 +108,11 @@ class MedicalQdrantClient:
         """
         return self.embedding_model.encode(text).tolist()
 
+    @retry_with_exponential_backoff(
+        max_retries=3,
+        initial_delay=1.0,
+        exceptions=(ConnectionError, TimeoutError, UnexpectedResponse, OSError)
+    )
     def store_patient_case(
         self,
         patient_id: str,
@@ -113,6 +121,8 @@ class MedicalQdrantClient:
     ) -> str:
         """
         Store a patient case in Qdrant with embeddings.
+
+        Phase 4: Now includes retry logic for resilience
 
         Args:
             patient_id: Unique patient identifier
@@ -156,13 +166,19 @@ class MedicalQdrantClient:
                 ]
             )
 
-            print(f"💾 Stored case for patient {patient_id} in Qdrant")
+            print(f"Stored case for patient {patient_id} in Qdrant")
             return point_id
 
         except Exception as e:
-            print(f"❌ Error storing case in Qdrant: {e}")
+            print(f"ERROR: Error storing case in Qdrant: {e}")
             raise
 
+    @cached(get_search_cache(), ttl=300.0)  # Cache for 5 minutes
+    @retry_with_exponential_backoff(
+        max_retries=3,
+        initial_delay=0.5,
+        exceptions=(ConnectionError, TimeoutError, UnexpectedResponse, OSError)
+    )
     def search_similar_cases(
         self,
         query_text: str,
@@ -172,6 +188,8 @@ class MedicalQdrantClient:
     ) -> List[Dict[str, Any]]:
         """
         Search for similar patient cases using semantic search.
+
+        Phase 4: Now includes retry logic and caching for performance
 
         Args:
             query_text: Text to search for (symptoms, complaints, etc.)
@@ -219,13 +237,19 @@ class MedicalQdrantClient:
                     "assessment": result.payload.get("assessment"),
                 })
 
-            print(f"🔍 Found {len(similar_cases)} similar cases")
+            print(f"Found {len(similar_cases)} similar cases")
             return similar_cases
 
         except Exception as e:
-            print(f"❌ Error searching Qdrant: {e}")
+            print(f"ERROR: Error searching Qdrant: {e}")
             return []
 
+    @cached(get_patient_history_cache(), ttl=600.0)  # Cache for 10 minutes
+    @retry_with_exponential_backoff(
+        max_retries=3,
+        initial_delay=0.5,
+        exceptions=(ConnectionError, TimeoutError, UnexpectedResponse, OSError)
+    )
     def get_patient_history(
         self,
         patient_id: str,
@@ -233,6 +257,8 @@ class MedicalQdrantClient:
     ) -> List[Dict[str, Any]]:
         """
         Get all cases for a specific patient (chronological history).
+
+        Phase 4: Now includes retry logic and caching for performance
 
         Args:
             patient_id: Patient identifier
@@ -271,11 +297,11 @@ class MedicalQdrantClient:
             # Sort by timestamp (newest first)
             history.sort(key=lambda x: x["timestamp"], reverse=True)
 
-            print(f"📚 Retrieved {len(history)} previous cases for patient {patient_id}")
+            print(f"Retrieved {len(history)} previous cases for patient {patient_id}")
             return history
 
         except Exception as e:
-            print(f"❌ Error retrieving patient history: {e}")
+            print(f"ERROR: Error retrieving patient history: {e}")
             return []
 
     def _create_searchable_text(self, case_data: Dict[str, Any]) -> str:

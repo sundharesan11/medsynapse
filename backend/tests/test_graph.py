@@ -5,14 +5,21 @@ This demonstrates the system working end-to-end without requiring
 the FastAPI server. Perfect for development and debugging.
 """
 
-import os
 import json
+import os
+import sys
+from pathlib import Path
+
 from dotenv import load_dotenv
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 # Load environment variables
 load_dotenv()
 
-from graph import process_patient_intake_sync
+from backend.graph import process_patient_intake_sync
 
 
 def print_section(title: str):
@@ -47,9 +54,9 @@ def test_simple_case():
         print_section("SOAP REPORT GENERATED")
 
         soap = result.soap_report
-        print(f"📋 Patient ID: {soap.patient_id}")
-        print(f"🕐 Generated: {soap.generated_at.strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"🎯 Confidence: {soap.confidence_level}")
+        print(f"Patient ID: {soap.patient_id}")
+        print(f"Generated: {soap.generated_at.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Confidence: {soap.confidence_level}")
 
         print("\n" + "─"*60)
         print("S - SUBJECTIVE")
@@ -73,23 +80,23 @@ def test_simple_case():
 
         if soap.flags:
             print("\n" + "─"*60)
-            print("🚩 FLAGS")
+            print("FLAGS")
             print("─"*60)
             for flag in soap.flags:
-                print(f"  • {flag}")
+                print(f"  - {flag}")
 
         # Save to file
         output_file = "test_soap_report.json"
         with open(output_file, "w") as f:
             json.dump(soap.model_dump(mode='json'), f, indent=2, default=str)
-        print(f"\n💾 Full report saved to: {output_file}")
+        print(f"\nFull report saved to: {output_file}")
 
     else:
-        print("❌ SOAP report generation failed")
+        print("ERROR: SOAP report generation failed")
         if result.errors:
             print("\nErrors:")
             for error in result.errors:
-                print(f"  • {error}")
+                print(f"  - {error}")
 
     return result
 
@@ -138,19 +145,19 @@ def test_complex_case():
         print_section("SOAP REPORT - COMPLEX CASE")
         soap = result.soap_report
 
-        print(f"📋 Patient ID: {soap.patient_id}")
-        print(f"🎯 Confidence: {soap.confidence_level}")
+        print(f"Patient ID: {soap.patient_id}")
+        print(f"Confidence: {soap.confidence_level}")
 
-        print("\n📊 ASSESSMENT (excerpt):")
+        print("\nASSESSMENT (excerpt):")
         print(soap.assessment[:300] + "...")
 
-        print("\n📝 PLAN (excerpt):")
+        print("\nPLAN (excerpt):")
         print(soap.plan[:300] + "...")
 
         if soap.flags:
-            print("\n🚩 CLINICAL FLAGS:")
+            print("\nCLINICAL FLAGS:")
             for flag in soap.flags:
-                print(f"  ⚠️  {flag}")
+                print(f"  WARNING: {flag}")
 
     return result
 
@@ -159,17 +166,17 @@ def main():
     """Run all test cases."""
 
     print("\n" + "="*60)
-    print("  🩺 DOCTOR'S INTELLIGENT ASSISTANT - TEST SUITE")
+    print("  DOCTOR'S INTELLIGENT ASSISTANT - TEST SUITE")
     print("="*60)
 
     # Check environment
-    print("\n🔧 Environment Check:")
-    print(f"  GROQ_API_KEY: {'✅ Set' if os.getenv('GROQ_API_KEY') else '❌ Missing'}")
-    print(f"  LANGCHAIN_API_KEY: {'✅ Set' if os.getenv('LANGCHAIN_API_KEY') else '❌ Missing'}")
-    print(f"  LangSmith Tracing: {'✅ Enabled' if os.getenv('LANGCHAIN_TRACING_V2') == 'true' else '⚠️  Disabled'}")
+    print("\nEnvironment Check:")
+    print(f"  GROQ_API_KEY: {'SUCCESS: Set' if os.getenv('GROQ_API_KEY') else 'ERROR: Missing'}")
+    print(f"  LANGCHAIN_API_KEY: {'SUCCESS: Set' if os.getenv('LANGCHAIN_API_KEY') else 'ERROR: Missing'}")
+    print(f"  LangSmith Tracing: {'SUCCESS: Enabled' if os.getenv('LANGCHAIN_TRACING_V2') == 'true' else 'WARNING: Disabled'}")
 
     if not os.getenv('GROQ_API_KEY'):
-        print("\n❌ ERROR: GROQ_API_KEY not found in environment")
+        print("\nERROR: GROQ_API_KEY not found in environment")
         print("Please create a .env file with your Groq API key")
         print("Get your key from: https://console.groq.com/keys")
         return
@@ -181,14 +188,14 @@ def main():
         # Uncomment to run complex case
         # test_complex_case()
 
-        print_section("✅ ALL TESTS COMPLETED")
+        print_section("SUCCESS: ALL TESTS COMPLETED")
 
         if os.getenv('LANGCHAIN_TRACING_V2') == 'true':
-            print("🔍 View detailed traces at: https://smith.langchain.com")
+            print("View detailed traces at: https://smith.langchain.com")
             print(f"   Project: {os.getenv('LANGCHAIN_PROJECT', 'default')}")
 
     except Exception as e:
-        print(f"\n❌ Test failed with error:")
+        print(f"\nERROR: Test failed with error:")
         print(f"   {type(e).__name__}: {str(e)}")
         import traceback
         traceback.print_exc()

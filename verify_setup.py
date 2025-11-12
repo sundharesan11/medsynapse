@@ -184,14 +184,14 @@ def main():
         print("✅ All checks passed! You're ready to go!")
         print("\n🚀 Next steps:")
         print("   1. cd backend")
-        print("   2. python test_graph.py")
+        print("   2. python tests/test_graph.py")
         print("   3. View traces at https://smith.langchain.com\n")
         return True
     else:
         print("❌ Some checks failed. Please fix the issues above.")
         print("\n📚 Help:")
         print("   See SETUP.md for detailed instructions")
-        print("   See README.md for troubleshooting\n")
+        print("   See docs/README.md for troubleshooting\n")
         return False
 
 

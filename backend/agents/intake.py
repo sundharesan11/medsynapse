@@ -11,6 +11,7 @@ from langchain_core.output_parsers import JsonOutputParser
 
 from models.schemas import GraphState, StructuredPatientData
 from utils.groq_client import get_intake_llm
+from utils.routing import determine_case_priority
 
 
 # The prompt template that guides the LLM's extraction
@@ -57,7 +58,7 @@ def intake_agent(state: GraphState) -> Dict[str, Any]:
     Returns:
         Dictionary with updated state (adds structured_data field)
     """
-    print("🩺 [INTAKE AGENT] Starting patient data extraction...")
+    print("[INTAKE AGENT] Starting patient data extraction...")
 
     # Get the raw input from the state
     if not state.patient_intake:
@@ -86,18 +87,27 @@ def intake_agent(state: GraphState) -> Dict[str, Any]:
             **result
         )
 
-        print(f"✅ [INTAKE AGENT] Extracted data for patient {patient_id}")
+        # Phase 4: Determine case priority for dynamic routing
+        case_priority = determine_case_priority(structured_data)
+
+        # Update routing path
+        routing_path = state.routing_path + ["intake"]
+
+        print(f"[INTAKE AGENT] Extracted data for patient {patient_id}")
         print(f"   Chief complaint: {structured_data.chief_complaint}")
         print(f"   Symptoms: {', '.join(structured_data.symptoms)}")
+        print(f"   Case Priority: {case_priority.upper()}")
 
         return {
             "structured_data": structured_data,
-            "current_step": "summary"
+            "current_step": "summary",
+            "case_priority": case_priority,
+            "routing_path": routing_path,
         }
 
     except Exception as e:
         error_msg = f"Intake agent error: {str(e)}"
-        print(f"❌ [INTAKE AGENT] {error_msg}")
+        print(f"[INTAKE AGENT ERROR] {error_msg}")
         return {
             "errors": [error_msg],
             "current_step": "intake_failed"

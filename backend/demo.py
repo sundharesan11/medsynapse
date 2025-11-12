@@ -157,7 +157,7 @@ def display_results(result, highlight_similar=False):
         print()
 
     # Display SOAP report
-    print_section("📄 SOAP REPORT", "─")
+    print_section("SOAP REPORT", "-")
 
     print(f"Patient ID: {soap.patient_id}")
     print(f"Generated: {soap.generated_at.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -298,7 +298,7 @@ def search_demo():
             if show_all != 'y':
                 print("TIP: Run again with 'y' to see ALL matches including filtered ones\n")
         else:
-            print("\n[INFO] No cases in database. Run test_qdrant.py to populate.\n")
+            print("\n[INFO] No cases in database. Run backend/tests/test_qdrant.py to populate.\n")
 
     except Exception as e:
         print(f"\n[ERROR] Search failed: {e}\n")

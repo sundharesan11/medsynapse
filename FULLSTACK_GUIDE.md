@@ -339,8 +339,8 @@ VITE_API_URL=http://localhost:8000
 - ✅ Phase 1: Backend working
 - ✅ Phase 2: Qdrant integration
 - ✅ Phase 3: React frontend
-- ⬜ Phase 4: Enhanced orchestration
-- ⬜ Phase 5: Docker deployment
+- [ ] Phase 4: Enhanced orchestration
+- [ ] Phase 5: Docker deployment
 
 ---
 

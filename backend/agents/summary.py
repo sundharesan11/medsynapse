@@ -58,7 +58,7 @@ def summary_agent(state: GraphState) -> Dict[str, Any]:
     Returns:
         Dictionary with updated state (adds clinical_summary field)
     """
-    print("📋 [SUMMARY AGENT] Generating clinical summary...")
+    print("[SUMMARY AGENT] Generating clinical summary...")
 
     if not state.structured_data:
         return {
@@ -88,18 +88,22 @@ def summary_agent(state: GraphState) -> Dict[str, Any]:
         result = chain.invoke(input_data)
         clinical_summary = ClinicalSummary(**result)
 
-        print(f"✅ [SUMMARY AGENT] Summary generated")
+        # Phase 4: Update routing path
+        routing_path = state.routing_path + ["summary"]
+
+        print(f"[SUMMARY AGENT] Summary generated")
         print(f"   Key findings: {len(clinical_summary.key_findings)}")
         print(f"   Risk factors: {len(clinical_summary.risk_factors)}")
 
         return {
             "clinical_summary": clinical_summary,
-            "current_step": "knowledge"
+            "current_step": "knowledge",
+            "routing_path": routing_path,
         }
 
     except Exception as e:
         error_msg = f"Summary agent error: {str(e)}"
-        print(f"❌ [SUMMARY AGENT] {error_msg}")
+        print(f"[SUMMARY AGENT ERROR] {error_msg}")
         return {
             "errors": state.errors + [error_msg],
             "current_step": "summary_failed"

@@ -74,6 +74,9 @@ class GraphState(BaseModel):
 
     This is the shared memory between all agents. Each agent reads from
     and writes to this state as the graph executes.
+
+    Phase 4: Enhanced with routing metadata for dynamic orchestration
+    Phase 5: Added patient history from memory agent
     """
 
     # Input
@@ -85,9 +88,21 @@ class GraphState(BaseModel):
     knowledge_context: Optional[KnowledgeContext] = None
     soap_report: Optional[SOAPReport] = None
 
+    # Phase 5: Patient history from memory agent
+    patient_history: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Patient's historical visits retrieved by memory agent"
+    )
+
     # Metadata
     current_step: str = Field(default="intake", description="Current processing step")
     errors: List[str] = Field(default_factory=list, description="Any errors encountered")
+
+    # Phase 4: Dynamic routing metadata
+    case_priority: str = Field(default="routine", description="Case priority: routine, urgent, or emergency")
+    routing_path: List[str] = Field(default_factory=list, description="Track which nodes were executed")
+    requires_enhanced_analysis: bool = Field(default=False, description="Flag for cases needing deeper analysis")
+    processing_time_ms: float = Field(default=0.0, description="Total processing time in milliseconds")
 
     class Config:
         arbitrary_types_allowed = True

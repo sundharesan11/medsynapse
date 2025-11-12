@@ -23,11 +23,11 @@ def storage_agent(state: GraphState) -> Dict[str, Any]:
     Returns:
         Dictionary with updated state
     """
-    print("💾 [STORAGE AGENT] Storing case in Qdrant...")
+    print("[STORAGE AGENT] Storing case in Qdrant...")
 
     # Validate all required data is present
     if not state.structured_data or not state.soap_report:
-        print("   ⚠️  Incomplete case data, skipping storage")
+        print("   WARNING: Incomplete case data, skipping storage")
         return {
             "current_step": "completed"
         }
@@ -50,17 +50,21 @@ def storage_agent(state: GraphState) -> Dict[str, Any]:
             session_id=state.patient_intake.session_id if state.patient_intake else None
         )
 
-        print(f"✅ [STORAGE AGENT] Case stored successfully")
+        # Phase 4: Update routing path
+        routing_path = state.routing_path + ["storage"]
+
+        print(f"SUCCESS: [STORAGE AGENT] Case stored successfully")
         print(f"   Point ID: {point_id}")
 
         return {
-            "current_step": "completed"
+            "current_step": "completed",
+            "routing_path": routing_path,
         }
 
     except Exception as e:
         # Don't fail the entire pipeline if storage fails
         error_msg = f"Storage agent warning: {str(e)}"
-        print(f"⚠️  [STORAGE AGENT] {error_msg}")
+        print(f"WARNING: [STORAGE AGENT] {error_msg}")
         print("   Case not stored, but pipeline completed")
 
         return {

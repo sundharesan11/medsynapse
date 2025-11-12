@@ -1,21 +1,21 @@
-# 🧠 Phase 2: Qdrant Vector Database Integration - Quick Start
+# Phase 2: Qdrant Vector Database Integration - Quick Start
 
 This guide walks you through setting up and testing the patient memory features.
 
 ---
 
-## 🎯 What's New in Phase 2?
+## What's New in Phase 2?
 
 Phase 2 adds **intelligent patient memory** to your system:
 
-✅ **Semantic Search** - Find similar cases even with different wording
-✅ **Patient History** - Track all encounters for each patient
-✅ **Similar Case Recommendations** - Automatically suggest relevant historical cases
-✅ **Embeddings** - Convert cases to vectors for fast similarity search
+- **Semantic Search** - Find similar cases even with different wording
+- **Patient History** - Track all encounters for each patient
+- **Similar Case Recommendations** - Automatically suggest relevant historical cases
+- **Embeddings** - Convert cases to vectors for fast similarity search
 
 ---
 
-## 🚀 Setup Steps
+## Setup Steps
 
 ### 1. Start Qdrant Database
 
@@ -51,7 +51,7 @@ This installs:
 
 ```bash
 cd backend
-python3 test_qdrant.py
+python3 tests/test_qdrant.py
 ```
 
 This will:
@@ -62,7 +62,7 @@ This will:
 
 ---
 
-## 📘 How It Works
+## How It Works
 
 ### Architecture Update
 
@@ -102,7 +102,7 @@ similar_cases = qdrant.search(query_embedding)
 
 ---
 
-## 🧪 Testing Semantic Search
+## Testing Semantic Search
 
 Try these examples:
 
@@ -140,7 +140,7 @@ for encounter in history:
 
 ---
 
-## 🔍 View Data in Qdrant UI
+## View Data in Qdrant UI
 
 If you started with `docker-compose`, you can browse your data:
 
@@ -151,7 +151,7 @@ If you started with `docker-compose`, you can browse your data:
 
 ---
 
-## 💡 Real-World Usage
+## Real-World Usage
 
 ### Scenario: Recurring Patient
 
@@ -188,7 +188,7 @@ print(f"Found {len(results)} cases with this pattern")
 
 ---
 
-## 🎓 Key Concepts
+## Key Concepts
 
 ### Embeddings
 - **What**: Numerical representation of text (vectors)
@@ -208,7 +208,7 @@ print(f"Found {len(results)} cases with this pattern")
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "Failed to connect to Qdrant"
 ```bash
@@ -223,7 +223,7 @@ docker logs medsynapse-qdrant
 ```
 
 ### "No similar cases found"
-- Database might be empty → run `test_qdrant.py` to populate
+- Database might be empty → run `python3 backend/tests/test_qdrant.py` to populate
 - Threshold too high → try `score_threshold=0.5`
 - Query too generic → be more specific
 
@@ -234,7 +234,7 @@ docker logs medsynapse-qdrant
 
 ---
 
-## 📊 Performance
+## Performance
 
 With Qdrant + sentence-transformers:
 
@@ -245,7 +245,7 @@ With Qdrant + sentence-transformers:
 
 ---
 
-## 🎯 Next Steps
+## Next Steps
 
 Now that Phase 2 is working, you can:
 
@@ -255,7 +255,7 @@ Now that Phase 2 is working, you can:
 
 ---
 
-## 🆘 Need Help?
+## Need Help?
 
 - **Qdrant docs**: https://qdrant.tech/documentation/
 - **Sentence Transformers**: https://www.sbert.net/
@@ -263,4 +263,4 @@ Now that Phase 2 is working, you can:
 
 ---
 
-**🎉 Enjoy Phase 2! Your system now has memory!**
+**Enjoy Phase 2! Your system now has memory!**

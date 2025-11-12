@@ -44,7 +44,7 @@ echo ""
 echo "🧪 Running Phase 2 tests..."
 echo ""
 cd backend
-python3 test_qdrant.py
+python3 tests/test_qdrant.py
 
 echo ""
 echo "============================================================"

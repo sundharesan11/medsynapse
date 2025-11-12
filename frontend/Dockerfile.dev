@@ -1,0 +1,31 @@
+# Dockerfile for Frontend - Local Development with Hot Reload
+# Based on Node.js 20 Alpine for smaller image size
+
+FROM node:20-alpine
+
+LABEL maintainer="MedSynapse Team"
+LABEL description="Frontend service for MedSynapse - Development mode with hot reload"
+
+# Set working directory
+WORKDIR /app
+
+# Install dependencies first for better caching
+COPY package.json package-lock.json* ./
+
+# Install all dependencies (including devDependencies for development)
+RUN npm install
+
+# Copy application code
+# In development, this will be overridden by volume mount
+COPY . .
+
+# Expose Vite dev server port
+EXPOSE 5173
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:5173 || exit 1
+
+# Development command with hot-reload
+# Vite dev server with host 0.0.0.0 to allow external connections
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

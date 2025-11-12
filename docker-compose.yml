@@ -1,4 +1,5 @@
 services:
+  # Qdrant Vector Database
   qdrant:
     image: qdrant/qdrant:latest
     container_name: medsynapse-qdrant
@@ -15,7 +16,67 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - medsynapse-network
+
+  # Backend API (FastAPI)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: medsynapse-backend
+    ports:
+      - "8000:8000"  # FastAPI server
+    volumes:
+      # Mount source code for hot-reload
+      - ./backend:/app
+      # Prevent overwriting node_modules and .venv
+      - /app/__pycache__
+      - /app/.venv
+    environment:
+      # Database connection
+      - QDRANT_URL=http://qdrant:6333
+      # API Keys (loaded from .env file)
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - LANGSMITH_API_KEY=${LANGSMITH_API_KEY}
+      - LANGSMITH_TRACING_V2=${LANGSMITH_TRACING_V2:-true}
+      - LANGSMITH_PROJECT=${LANGSMITH_PROJECT:-medsynapse-dev}
+      # Python
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - medsynapse-network
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: medsynapse-frontend
+    ports:
+      - "5173:3000"  # Map external 5173 to internal 3000 (Vite default)
+    volumes:
+      # Mount source code for hot-reload
+      - ./frontend:/app
+      # Prevent overwriting node_modules
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - NODE_ENV=development
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - medsynapse-network
 
 networks:
-  default:
-    name: medsynapse-network
+  medsynapse-network:
+    driver: bridge
