@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: medsynapse-qdrant
+    ports:
+      - "6333:6333"  # REST API
+      - "6334:6334"  # gRPC (optional)
+    volumes:
+      - ./qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Optional: Qdrant Web UI for browsing collections
+  qdrant-web-ui:
+    image: qdrant/qdrant-web-ui:latest
+    container_name: medsynapse-qdrant-ui
+    ports:
+      - "3001:3000"
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+    depends_on:
+      - qdrant
+    restart: unless-stopped
+
+networks:
+  default:
+    name: medsynapse-network
