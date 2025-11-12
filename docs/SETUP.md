@@ -51,7 +51,9 @@ LANGCHAIN_PROJECT=medsynapse-dev
 
 ---
 
-## Step 3: Install Dependencies
+## Step 3: Install Dependencies (Docker Required for Local Qdrant)
+
+> **Note:** Docker Desktop (or Docker Engine) is required if you plan to run Qdrant locally. Without Docker, use a managed Qdrant cloud instance and set `QDRANT_URL`/`QDRANT_API_KEY` in `.env`.
 
 ```bash
 # Create virtual environment
